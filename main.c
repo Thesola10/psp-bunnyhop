@@ -131,8 +131,7 @@ int main(void)
     bhop_ButtonMap_load(&bm);
 
     // Main game loop
-    while (flag && !WindowShouldClose())    
-    {
+    while (flag && !WindowShouldClose()) {
         // Update
         bhop_scanButtons();
         // Update player-controlled-box (box02)
@@ -180,17 +179,19 @@ int main(void)
         //----------------------------------------------------------------------------------
         BeginDrawing();
 
+# define DrawLayer$(tex) \
+            DrawTextureRec( tex , \
+                    (Rectangle) { 0, 0, (float)screenWidth, (float)screenHeight }, \
+                    (Vector2) { 0, 0 }, WHITE);
+
             ClearBackground(RAYWHITE);
-            DrawTexture(texBg, 0, 0, WHITE);
             //DrawTexture(bg.texture, 0, 0, WHITE);
-            /*DrawTextureRec(texBg,
-                    (Rectangle) { 0, 0, (float)screenWidth, (float)screenHeight },
-                    (Vector2) { 0, 0 }, WHITE);*/
-            
-            DrawTexture(bhop_Level_getDecorTexture(&level_lapinou), 0, 0, WHITE);
+
+            DrawLayer$(texBg);
+
+            DrawLayer$(bhop_Level_getDecorTexture(&level_lapinou));
 
             DrawRectangleRec(boxB, BLUE);
-
 
             for (int i = 0; i < bunniesCount; i++)
             {
@@ -203,8 +204,7 @@ int main(void)
                 DrawTexture(texBunny, (int)bunnies[i].position.x, (int)bunnies[i].position.y, bunnies[i].color);
             }
 
-            DrawTexture(bhop_Level_getTerrainTexture(&level_lapinou), 0, 0, WHITE);
-
+            DrawLayer$(bhop_Level_getTerrainTexture(&level_lapinou));
 
             DrawRectangle(0, 0, screenWidth, 40, BLACK);
             DrawText(TextFormat("bunnies: %i", bunniesCount), 120, 15, 10, GREEN);

@@ -1,4 +1,7 @@
 #include <raylib.h>
+
+#include "levels/level.h"
+
 typedef enum {
   bhop_Entity_NULL = 0,
   bhop_Entity_PLAYER,
@@ -13,7 +16,7 @@ typedef struct {
   char is_fixed;
   char is_on_ground;
 } bhop_Entity;
-void bhop_Entity_jump(
-    bhop_Entity *entity);
+
+void bhop_Entity_jump(bhop_Entity *entity);
 void bhop_Entity_walk(bhop_Entity *entity);
-void bhop_updateEntities(void);
+void bhop_updateEntities(bhop_Level *lvl);

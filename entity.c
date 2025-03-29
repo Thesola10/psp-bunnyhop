@@ -6,6 +6,7 @@
 #define WALKSPEED TILESIZE
 #define BUNNYHOPSPEED TILESIZE * 2
 #define JUMPHEIGHT TILESIZE * 4
+
 bhop_Entity *player;
 
 Rectangle _impl_bhop_Entity_getRect(bhop_Entity *entity) {
@@ -36,6 +37,7 @@ void bhop_Entity_jump(bhop_Entity *entity) {
     assert(0);
   }
 }
+
 void bhop_Entity_walk(bhop_Entity *entity) {
   switch (entity->type) {
   case bhop_Entity_MUSTACHO: {
@@ -48,4 +50,8 @@ void bhop_Entity_walk(bhop_Entity *entity) {
     assert(0);
   }
 }
-void bhop_updateEntities(void) {}
+
+void bhop_updateEntities(bhop_Level *lvl)
+{
+
+}

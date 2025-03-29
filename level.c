@@ -32,7 +32,7 @@ Texture2D bhop_Level_getTerrainTexture(bhop_Level *lvl)
     }
 
     lvl->terrainLayer.output = LoadTextureFromImage(target);
-    lvl->terrainLayer.lifetime = -1;
+    lvl->terrainLayer.lifetime = 120;
 
     UnloadImage(target);
     return lvl->terrainLayer.output;
@@ -59,7 +59,7 @@ Texture2D bhop_Level_getDecorTexture(bhop_Level *lvl)
     }
 
     lvl->decorLayer.output = LoadTextureFromImage(target);
-    lvl->decorLayer.lifetime = -1;
+    lvl->decorLayer.lifetime = 120;
 
     UnloadImage(target);
     return lvl->decorLayer.output;
