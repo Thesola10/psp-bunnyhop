@@ -1,6 +1,5 @@
-#include <assert.h>
-
 #include "entity.h"
+#include <assert.h>
 
 #define TILESIZE 16
 #define GRAVITY -TILESIZE * 0.1
@@ -37,5 +36,16 @@ void bhop_Entity_jump(bhop_Entity *entity) {
     assert(0);
   }
 }
-void bhop_Entity_walk(bhop_Entity *entity) {}
+void bhop_Entity_walk(bhop_Entity *entity) {
+  switch (entity->type) {
+  case bhop_Entity_MUSTACHO: {
+    if (entity->is_on_ground) {
+      entity->velocity = (Vector2){.x = WALKSPEED, .y = entity->velocity.y};
+    }
+    break;
+  }
+  default:
+    assert(0);
+  }
+}
 void bhop_updateEntities(void) {}
