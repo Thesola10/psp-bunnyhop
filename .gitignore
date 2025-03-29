@@ -1,6 +1,7 @@
 EBOOT.PBP
 PARAM.SFO
 *.o
+*.lvl.c
 *.elf
 *.prx
 .ccls-cache

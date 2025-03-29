@@ -1,6 +1,6 @@
 BUILD_PRX = 1
 TARGET = raylib
-OBJS = main.o controller.o
+OBJS = main.o controller.o levels/lapinou.lvl.o
 INCDIR =
 CFLAGS = -Wall
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
@@ -15,6 +15,9 @@ PSP_EBOOT_TITLE = My Raylib Demo
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak
 
-textures/%-fs8.png: %.png
+levels/%.lvl.c: levels/%.json
+	jsonnet -S --tla-code-file lvl=$^ -A name=$(patsubst levels/%.json,%,$^) levels/mkLevel.jsonnet > $@
+
+textures/%-fs8.png: textures/%.png
 	rm -f $@
 	pngquant $^
