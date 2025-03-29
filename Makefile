@@ -1,6 +1,6 @@
 BUILD_PRX = 1
 TARGET = raylib
-OBJS = main.o
+OBJS = main.o controller.o
 INCDIR =
 CFLAGS = -Wall
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti

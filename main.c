@@ -22,6 +22,7 @@
 
 #include <raylib.h>
 
+#include "controller.h"
 
 PSP_MODULE_INFO("bunnymark", 0, 1, 1);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
@@ -49,82 +50,12 @@ typedef struct Bunny {
     Color color;
 } Bunny;
 
-void updateController()
-{
-    sceCtrlReadBufferPositive(&pad, 1);
 
-    if (pad.Buttons != 0)
-    {
-        if (pad.Buttons & PSP_CTRL_SQUARE)
-        {
-            TraceLog(LOG_INFO,"Square pressed \n");
-        }
-        
-        if (pad.Buttons & PSP_CTRL_TRIANGLE)
-        {
-            TraceLog(LOG_INFO,"Triangle pressed \n");
-        } 
-        
-        if (pad.Buttons & PSP_CTRL_CIRCLE)
-        {
-            TraceLog(LOG_INFO,"Cicle pressed \n");
-        } 
-        
-        if (pad.Buttons & PSP_CTRL_CROSS)
-        {
-            TraceLog(LOG_INFO,"Cross pressed \n");
-            xflag = 1;
-        } 
+char up, down, left, right;
 
-        if (pad.Buttons & PSP_CTRL_UP)
-        {
-            TraceLog(LOG_INFO,"Up pressed \n");
-            y=y-6;
-        } 
-        
-        if (pad.Buttons & PSP_CTRL_DOWN)
-        {
-            TraceLog(LOG_INFO,"Down pressed \n");
-            y=y+6;
-        } 
-        
-        if (pad.Buttons & PSP_CTRL_LEFT)
-        {
-            TraceLog(LOG_INFO,"Left pressed \n");
-            x=x-6;
-        } 
-        
-        if (pad.Buttons & PSP_CTRL_RIGHT)
-        {
-            TraceLog(LOG_INFO,"Right pressed \n");
-            x=x+6;
-        }      
-
-        if (pad.Buttons & PSP_CTRL_START)
-        {
-            TraceLog(LOG_INFO,"Start pressed \n");
-            flag=0;
-        }
-        
-        if (pad.Buttons & PSP_CTRL_SELECT)
-        {
-            TraceLog(LOG_INFO,"Select pressed \n");
-        }
-        
-        if (pad.Buttons & PSP_CTRL_LTRIGGER)
-        {
-            TraceLog(LOG_INFO,"L-trigger pressed \n");
-        }
-        
-        if (pad.Buttons & PSP_CTRL_RTRIGGER)
-        {
-            TraceLog(LOG_INFO,"R-trigger pressed \n");
-        }      
-    }
-
+int _flush_cache() {
+    return 0;
 }
-
-
 
 
 //------------------------------------------------------------------------------------
@@ -146,6 +77,9 @@ int main(void)
     // Load bunny texture
     Texture2D texBunny = LoadTexture("host0:/textures/bunnymark/wabbit_alpha.png");
 
+    Texture2D texBg = LoadTexture("host0:/textures/bg.png");
+
+
     Bunny *bunnies = (Bunny *)malloc(MAX_BUNNIES*sizeof(Bunny));    // Bunnies array
 
     int bunniesCount = 0;           // Bunnies counter
@@ -153,18 +87,39 @@ int main(void)
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
+
+
+    bhop_ButtonMap bm = {
+        .onCross = bhop_$ButtonEvent({ xflag = pressed; }),
+        .onStart = bhop_$ButtonEvent({ flag = 0; }),
+        .onUp = bhop_$ButtonEvent({ up = pressed; }),
+        .onDown = bhop_$ButtonEvent({ down = pressed; }),
+        .onLeft = bhop_$ButtonEvent({ left = pressed; }),
+        .onRight = bhop_$ButtonEvent({ right = pressed; })
+    };
+
+    bhop_ButtonMap_load(&bm);
+    RenderTexture2D bg = LoadRenderTexture(screenHeight, screenWidth);
+
+    BeginTextureMode(bg);
+        DrawTexture(texBg, 0, 0, WHITE);
+    EndTextureMode();
     // Main game loop
-    while (flag)    
+    while (flag && !WindowShouldClose())    
     {
         // Update
-        updateController();
+        bhop_scanButtons();
         // Update player-controlled-box (box02)
         boxB.x = x - boxB.width/2;
         boxB.y = y - boxB.height/2;
         //----------------------------------------------------------------------------------
+        if (up)  y = y - 6;
+        if (down) y = y + 6;
+        if (left) x = x - 6;
+        if (right) x = x + 6;
         if (xflag)
         {
-            xflag=0;
+            //xflag=0;
             // Create more bunnies
             for (int i = 0; i < 100; i++)
             {
@@ -200,6 +155,10 @@ int main(void)
         BeginDrawing();
 
             ClearBackground(RAYWHITE);
+            DrawTexture(bg.texture, 0, 0, WHITE);
+            /*DrawTextureRec(bg.texture,
+                    (Rectangle) { 0, 0, (float)screenWidth, (float)screenHeight },
+                    (Vector2) { 0, 0 }, WHITE);*/
             DrawRectangleRec(boxB, BLUE);
 
             for (int i = 0; i < bunniesCount; i++)
@@ -228,6 +187,10 @@ int main(void)
     free(bunnies);              // Unload bunnies data array
 
     UnloadTexture(texBunny);    // Unload bunny texture
+
+    UnloadRenderTexture(bg);
+
+    UnloadTexture(texBg);
 
     CloseWindow();              // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
