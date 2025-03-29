@@ -1,6 +1,7 @@
 BUILD_PRX = 1
 TARGET = raylib
-OBJS = main.o controller.o levels/lapinou.lvl.o
+OBJS = main.o controller.o level.o tileset.o \
+	   levels/lapinou.lvl.o
 INCDIR =
 CFLAGS = -Wall
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
@@ -10,7 +11,7 @@ LIBDIR =
 LDFLAGS =
 LIBS =   -lraylib -lpng -lz -lglut -lGLU -lGL -lpspvfpu
 
-EXTRA_TARGETS = EBOOT.PBP textures/bg-fs8.png
+EXTRA_TARGETS = EBOOT.PBP textures/bg-fs8.png textures/spriteset-fs8.png
 PSP_EBOOT_TITLE = My Raylib Demo
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak

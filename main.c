@@ -23,6 +23,7 @@
 #include <raylib.h>
 
 #include "controller.h"
+#include "levels/level.h"
 
 PSP_MODULE_INFO("bunnymark", 0, 1, 1);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
@@ -58,6 +59,30 @@ int _flush_cache() {
 }
 
 
+#define TILESIZE 16
+
+void printTile(Texture2D tileset, int tileId, Vector2 where)
+{
+    int workId = tileId - 1;
+
+    int tilex = workId % (tileset.width / TILESIZE);
+    int tiley = workId / (tileset.width / TILESIZE);
+
+    Rectangle subTile = (Rectangle) {
+        .width = TILESIZE,
+        .height = TILESIZE,
+        .x = tilex * TILESIZE,
+        .y = tiley * TILESIZE
+    };
+
+    if (!tileId) return;
+
+    DrawTextureRec(tileset, subTile, where, WHITE);
+}
+
+
+extern bhop_Level level_lapinou;
+
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -80,6 +105,10 @@ int main(void)
     Image imgBg = LoadImage("host0:/textures/bg-fs8.png");
     Texture2D texBg = LoadTextureFromImage(imgBg);
 
+    bhop_loadLevelTileset(LoadTexture("host0:/textures/spriteset-fs8.png"));
+
+    level_lapinou.terrainLayer.lifetime = 0;
+    level_lapinou.decorLayer.lifetime = 0;
 
     Bunny *bunnies = (Bunny *)malloc(MAX_BUNNIES*sizeof(Bunny));    // Bunnies array
 
@@ -152,12 +181,16 @@ int main(void)
         BeginDrawing();
 
             ClearBackground(RAYWHITE);
-            DrawTexture(texBg, 1, 1, WHITE);
+            DrawTexture(texBg, 0, 0, WHITE);
             //DrawTexture(bg.texture, 0, 0, WHITE);
             /*DrawTextureRec(texBg,
                     (Rectangle) { 0, 0, (float)screenWidth, (float)screenHeight },
                     (Vector2) { 0, 0 }, WHITE);*/
+            
+            DrawTexture(bhop_Level_getDecorTexture(&level_lapinou), 0, 0, WHITE);
+
             DrawRectangleRec(boxB, BLUE);
+
 
             for (int i = 0; i < bunniesCount; i++)
             {
@@ -169,6 +202,9 @@ int main(void)
                 // it could generates a stall and consequently a frame drop, limiting the number of drawn bunnies
                 DrawTexture(texBunny, (int)bunnies[i].position.x, (int)bunnies[i].position.y, bunnies[i].color);
             }
+
+            DrawTexture(bhop_Level_getTerrainTexture(&level_lapinou), 0, 0, WHITE);
+
 
             DrawRectangle(0, 0, screenWidth, 40, BLACK);
             DrawText(TextFormat("bunnies: %i", bunniesCount), 120, 15, 10, GREEN);
