@@ -119,24 +119,14 @@ int main(void)
         .onCross = bhop_$ButtonEvent({ xflag = pressed; }),
         .onCircle = bhop_$ButtonEvent({
                     bhop_Entity *player = bhop_Level_getPlayerEntity(&level_lapinou);
-                    if (player->collider & bhop_EntityCollider_$SOUTH)
-                        player->velocity.y = -8.0f;
+                    if (playerTiming.cdSouth || playerTiming.cdEast || playerTiming.cdWest)
+                        player->velocity.y = -10.0f;
                 }),
         .onStart = bhop_$ButtonEvent({ flag = 0; }),
         .onUp = bhop_$ButtonEvent({ up = pressed; }),
         .onDown = bhop_$ButtonEvent({ down = pressed; }),
-        .onLeft = bhop_$ButtonEvent({
-                    left = pressed;
-                    bhop_Entity *player = bhop_Level_getPlayerEntity(&level_lapinou);
-
-                    player->velocity.x = -4.0f;
-                }),
-        .onRight = bhop_$ButtonEvent({
-                    right = pressed;
-                    bhop_Entity *player = bhop_Level_getPlayerEntity(&level_lapinou);
-
-                    player->velocity.x = 4.0f;
-                }),
+        .onLeft = bhop_$ButtonEvent({ left = pressed; }),
+        .onRight = bhop_$ButtonEvent({ right = pressed; }),
     };
 
     bhop_ButtonMap_load(&bm);
@@ -145,14 +135,28 @@ int main(void)
     while (flag && !WindowShouldClose()) {
         // Update
         bhop_scanButtons();
+
+        bhop_updateEntities(&level_lapinou);
+
+        bhop_Entity *player = bhop_Level_getPlayerEntity(&level_lapinou);
         // Update player-controlled-box (box02)
         boxB.x = x - boxB.width/2;
         boxB.y = y - boxB.height/2;
         //----------------------------------------------------------------------------------
         if (up)  y = y - 6;
         if (down) y = y + 6;
-        if (left) x = x - 6;
-        if (right) x = x + 6;
+        if (left) {
+            if (player->collider & bhop_EntityCollider_$SOUTH)
+                player->velocity.x = -4.5f;
+            else if (player->velocity.x > -4.0f)
+                player->velocity.x -= 0.4f;
+        }
+        if (right) {
+            if (player->collider & bhop_EntityCollider_$SOUTH)
+                player->velocity.x = 4.5f;
+            else if (player->velocity.x < 4.0f)
+                player->velocity.x += 0.4f;
+        }
 
         // Draw
         //----------------------------------------------------------------------------------
@@ -181,7 +185,6 @@ int main(void)
         EndDrawing();
         //----------------------------------------------------------------------------------
         //
-        bhop_updateEntities(&level_lapinou);
     }
 
     // De-Initialization

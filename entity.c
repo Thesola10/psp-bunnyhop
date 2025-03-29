@@ -5,12 +5,14 @@
 #include <math.h>
 
 #define TILESIZE 16
-#define GRAVITY (TILESIZE * 0.1)
+#define GRAVITY 1.2f
 #define WALKSPEED TILESIZE
 #define BUNNYHOPSPEED TILESIZE * 2
 #define JUMPHEIGHT TILESIZE * 4
 
 bhop_Entity *player;
+
+bhop_PlayerTiming playerTiming;
 
 Rectangle _impl_bhop_Entity_getRect(bhop_Entity *entity) {
   return (Rectangle){.height = TILESIZE,
@@ -57,11 +59,15 @@ void bhop_Entity_walk(bhop_Entity *entity) {
 
 void _impl_bhop_Entity_updateTileCollision(bhop_Entity *ent, bhop_Level *lvl)
 {
-    int clamp_x = ((int) ent->origin.x) % TILESIZE;
-    int clamp_y = ((int) ent->origin.y) % TILESIZE;
+    int clamp_x, clamp_y;
+    int tile_x, tile_y;
 
-    int tile_x = ((int) ent->origin.x) / TILESIZE;
-    int tile_y = ((int) ent->origin.y) / TILESIZE;
+    clamp_x = ((int) ent->origin.x) % TILESIZE;
+    clamp_y = ((int) ent->origin.y) % TILESIZE;
+
+    tile_x = ((int) ent->origin.x) / TILESIZE;
+
+    tile_y = ((int) ent->origin.y + ent->velocity.y) / TILESIZE;
 
     int tile_nw = bhop_Level_getTerrainTile(lvl, (Vector2) {.x = tile_x,     .y = tile_y - 1});
     int tile_ne = bhop_Level_getTerrainTile(lvl, (Vector2) {.x = tile_x + 1, .y = tile_y - 1});
@@ -127,11 +133,45 @@ void _impl_bhop_Entity_updateMovement(bhop_Entity *ent)
 
 void bhop_updateEntities(bhop_Level *lvl)
 {
+    bhop_Entity *player = bhop_Level_getPlayerEntity(lvl);
+
     for (int i = 0; i < lvl->entities_count; i++) {
-        if (! bhop_Entity_isFixed$(lvl->entities[i])) {
-            _impl_bhop_Entity_updateTileCollision(&lvl->entities[i], lvl);
-            _impl_bhop_Entity_updateMovement(&lvl->entities[i]);
+        bhop_Entity *ent = &lvl->entities[i];
+
+        if (ent->type == bhop_Entity_NULL)
+            continue;
+
+        if (! bhop_Entity_isFixed$(*ent)) {
+            _impl_bhop_Entity_updateTileCollision(ent, lvl);
+            _impl_bhop_Entity_updateMovement(ent);
+        }
+
+        if (ent == player) {
+            if (playerTiming.cdSouth)
+                playerTiming.cdSouth -= 1;
+            if (playerTiming.cdWest)
+                playerTiming.cdWest -= 1;
+            if (playerTiming.cdEast)
+                playerTiming.cdEast -= 1;
+            if (playerTiming.cdNorth)
+                playerTiming.cdNorth -= 1;
+
+            if (player->collider & bhop_EntityCollider_$SOUTH)
+                playerTiming.cdSouth = 3;
+            if (player->collider & bhop_EntityCollider_$NORTH)
+                playerTiming.cdNorth = 3;
+            if (player->collider & bhop_EntityCollider_$EAST)
+                playerTiming.cdEast = 3;
+            if (player->collider & bhop_EntityCollider_$WEST)
+                playerTiming.cdWest = 3;
+
+            continue;
+        }
+
+        if (_impl_bhop_Entity_intersects(player, ent)) {
+            ent->type = bhop_Entity_NULL;
         }
     }
+
 }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.1" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="16" tileheight="16" infinite="0" backgroundcolor="#a0c8ff" nextlayerid="6" nextobjectid="8">
+<map version="1.10" tiledversion="1.11.1" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="16" tileheight="16" infinite="0" backgroundcolor="#a0c8ff" nextlayerid="7" nextobjectid="8">
  <editorsettings>
   <export target="lapinou.json" format="json"/>
  </editorsettings>
@@ -7,6 +7,9 @@
   <property name="name" value="lapinou"/>
  </properties>
  <tileset firstgid="1" source="lapinou.tsx"/>
+ <imagelayer id="6" name="Background" offsetx="-0.452386" offsety="-31.667">
+  <image source="../textures/bg.png" width="512" height="512"/>
+ </imagelayer>
  <layer id="4" name="Parallax" width="30" height="17" opacity="0.12">
   <data encoding="csv">
 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,8,8,8,

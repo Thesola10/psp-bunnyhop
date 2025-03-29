@@ -32,11 +32,20 @@ typedef char bhop_EntityCollider;
 #define bhop_EntityCollider_$WEST  1<<3
 
 typedef struct {
-  bhop_EntityType type;
-  Vector2 origin;
-  Vector2 velocity;
-  bhop_EntityCollider collider;
+    bhop_EntityType type;
+    Vector2 origin;
+    Vector2 velocity;
+    bhop_EntityCollider collider;
 } bhop_Entity;
+
+typedef struct {
+    int cdNorth;
+    int cdSouth;
+    int cdEast;
+    int cdWest;
+} bhop_PlayerTiming;
+
+extern bhop_PlayerTiming playerTiming;
 
 void bhop_Entity_jump(bhop_Entity *entity);
 void bhop_Entity_walk(bhop_Entity *entity);

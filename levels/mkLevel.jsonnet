@@ -11,7 +11,6 @@ function(lvl, name)
   local EntityToStruct(ent) = '{ .type = bhop_Entity_' + ent.type
                               + ', .origin = (Vector2) { .x = ' + ent.x + ', .y = ' + ent.y + '}'
                               + ', .velocity = (Vector2) { .x = 0, .y = 0 }'
-                              + ', .is_fixed = 0'
                               + '}';
 
   local WriteEntities() =
