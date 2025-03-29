@@ -1,4 +1,5 @@
 gcc
+-fblocks
 -I/usr/local/pspdev/psp/sdk/include
 -I/usr/local/pspdev/psp/include
 -D_PSP_FW_VERSION=660

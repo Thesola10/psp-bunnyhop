@@ -4,12 +4,22 @@
 #include <raylib.h>
 #include <pspctrl.h>
 
-typedef void (*bhop_ButtonEvent)(char pressed, SceCtrlData state);
 
-#define _impl_bhop_$ButtonEventBlock(n, x) \
+#if defined(__clang__)
+
+  typedef void (^bhop_ButtonEvent)(char pressed, SceCtrlData state);
+  # define _impl_bhop_$ButtonEventBlock(n, x) \
+    ^ void (char pressed, SceCtrlData state) x
+
+#elif defined(__GNUC__)
+
+  typedef void (*bhop_ButtonEvent)(char pressed, SceCtrlData state);
+  #define _impl_bhop_$ButtonEventBlock(n, x) \
     ({ void _gen_bhop_ButtonEventHandler_##n (char pressed, SceCtrlData state) x; \
        _gen_bhop_ButtonEventHandler_##n; \
     })
+
+#endif
 
 #define _impl_bhop_$ButtonEvent(n, x) \
     _impl_bhop_$ButtonEventBlock(n, x)
