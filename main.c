@@ -77,7 +77,8 @@ int main(void)
     // Load bunny texture
     Texture2D texBunny = LoadTexture("host0:/textures/bunnymark/wabbit_alpha.png");
 
-    Texture2D texBg = LoadTexture("host0:/textures/bg.png");
+    Image imgBg = LoadImage("host0:/textures/bg-fs8.png");
+    Texture2D texBg = LoadTextureFromImage(imgBg);
 
 
     Bunny *bunnies = (Bunny *)malloc(MAX_BUNNIES*sizeof(Bunny));    // Bunnies array
@@ -99,11 +100,7 @@ int main(void)
     };
 
     bhop_ButtonMap_load(&bm);
-    RenderTexture2D bg = LoadRenderTexture(screenHeight, screenWidth);
 
-    BeginTextureMode(bg);
-        DrawTexture(texBg, 0, 0, WHITE);
-    EndTextureMode();
     // Main game loop
     while (flag && !WindowShouldClose())    
     {
@@ -155,8 +152,9 @@ int main(void)
         BeginDrawing();
 
             ClearBackground(RAYWHITE);
-            DrawTexture(bg.texture, 0, 0, WHITE);
-            /*DrawTextureRec(bg.texture,
+            DrawTexture(texBg, 1, 1, WHITE);
+            //DrawTexture(bg.texture, 0, 0, WHITE);
+            /*DrawTextureRec(texBg,
                     (Rectangle) { 0, 0, (float)screenWidth, (float)screenHeight },
                     (Vector2) { 0, 0 }, WHITE);*/
             DrawRectangleRec(boxB, BLUE);
@@ -188,7 +186,6 @@ int main(void)
 
     UnloadTexture(texBunny);    // Unload bunny texture
 
-    UnloadRenderTexture(bg);
 
     UnloadTexture(texBg);
 
