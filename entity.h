@@ -1,8 +1,4 @@
 #include <raylib.h>
-
-
-// texture <- (composite)
-
 typedef enum {
   bhop_Entity_NULL = 0,
   bhop_Entity_PLAYER,
@@ -13,19 +9,11 @@ typedef enum {
 typedef struct {
   bhop_EntityType type;
   Vector2 origin;
-  Vector2 direction;
+  Vector2 velocity;
   char is_fixed;
+  char is_on_ground;
 } bhop_Entity;
-float gravity;
-
-//// FUNCTION
-
-// JUMP force y, x depend Mustacho/Bunny
-
-// WALK creeper
-
-// update
-
-// draw
-
-// check_collision
+void bhop_Entity_jump(
+    bhop_Entity *entity);
+void bhop_Entity_walk(bhop_Entity *entity);
+void bhop_updateEntities(void);
