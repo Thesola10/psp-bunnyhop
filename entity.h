@@ -1,12 +1,12 @@
 #include <raylib.h>
 
-#include "levels/level.h"
+typedef struct _impl_bhop_Level bhop_Level;
 
 typedef enum {
   bhop_Entity_NULL = 0,
-  bhop_Entity_PLAYER,
-  bhop_Entity_MUSTACHO,
-  bhop_Entity_EGG,
+  bhop_Entity_PLAYER = 16,
+  bhop_Entity_MUSTACHO = 14,
+  bhop_Entity_EGG = 13,
 } bhop_EntityType;
 
 typedef struct {

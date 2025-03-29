@@ -1,3 +1,4 @@
+#include "tileset.h"
 #include "entity.h"
 #include <assert.h>
 
@@ -55,3 +56,4 @@ void bhop_updateEntities(bhop_Level *lvl)
 {
 
 }
+

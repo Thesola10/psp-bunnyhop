@@ -204,9 +204,10 @@ int main(void)
                 DrawTexture(texBunny, (int)bunnies[i].position.x, (int)bunnies[i].position.y, bunnies[i].color);
             }
 
+            bhop_Level_drawEntities(&level_lapinou);
+
             DrawLayer$(bhop_Level_getTerrainTexture(&level_lapinou));
 
-            DrawRectangle(0, 0, screenWidth, 40, BLACK);
             DrawText(TextFormat("bunnies: %i", bunniesCount), 120, 15, 10, GREEN);
             DrawText(TextFormat("batched draw calls: %i", 1 + bunniesCount/MAX_BATCH_ELEMENTS), 200, 15, 10, MAROON);
 

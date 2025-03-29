@@ -1,6 +1,6 @@
 BUILD_PRX = 1
 TARGET = raylib
-OBJS = main.o controller.o level.o tileset.o \
+OBJS = controller.o level.o entity.o tileset.o main.o \
 	   levels/lapinou.lvl.o
 INCDIR =
 CFLAGS = -Wall

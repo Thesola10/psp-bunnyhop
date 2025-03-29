@@ -23,6 +23,6 @@ function(lvl, name)
   local WriteLayer(layer) = WriteLayer_(layer, FindLayer(layer));
 
 
-  '#include "level.h"\n'
+  '#include "../level.h"\n'
   + WriteLayer('Terrain') + WriteLayer('Decor') + WriteEntities()
   + 'bhop_Level level_' + name + ' = { .terrain_size = size_layer_Terrain, .decor_size = size_layer_Decor, .entities_count = num_ents, .terrain = layer_Terrain, .decor = layer_Decor, .entities = entities };'

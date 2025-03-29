@@ -1,4 +1,4 @@
-#include "levels/level.h"
+#include "level.h"
 
 #include "tileset.h"
 
@@ -9,6 +9,15 @@ void bhop_loadLevelTileset(Texture2D tileset)
 {
     bhop_levelTileset = tileset;
     bhop_levelTilesetImg = LoadImageFromTexture(tileset);
+}
+
+void bhop_Level_drawEntities(bhop_Level *lvl)
+{
+    for (int i = 0; i < lvl->entities_count; i++) {
+        bhop_Entity ent = lvl->entities[i];
+        Vector2 realPos = (Vector2) { .x = ent.origin.x, .y = ent.origin.y - TILESIZE };
+        bhop_drawTile(bhop_levelTileset, ent.type, realPos);
+    }
 }
 
 Texture2D bhop_Level_getTerrainTexture(bhop_Level *lvl)
