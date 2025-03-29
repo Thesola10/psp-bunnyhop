@@ -3,8 +3,8 @@ function(lvl, name)
   local CArray(array) = '{' + std.foldl(function(l, r) l + ', ' + r, array[1:], array[0]) + '}';
 
   local WriteLayer_(layer, ldat) =
-    'static const Vector2 size_layer_' + layer + ' = { .x = ' + ldat.width + ', .y = ' + ldat.height + '};' +
-    'static char layer_' + layer + '[] = ' + CArray(ldat.data) + ';';
+    'static const Vector2 size_layer_' + layer + ' = { .x = ' + ldat.width + ', .y = ' + ldat.height + '};\n' +
+    'static char layer_' + layer + '[] = ' + CArray(ldat.data) + ';\n';
 
   local FindLayer(layer) = std.filter(function(m) m.name == layer, lvl.layers)[0];
 
@@ -17,8 +17,8 @@ function(lvl, name)
   local WriteEntities() =
     local ents = FindLayer('Entities');
     local num_ents = std.toString(std.length(ents.objects) + 1);
-    'static const int num_ents = ' + num_ents + ';' +
-    'static bhop_Entity entities[' + num_ents + '] =' + CArray(std.map(EntityToStruct, ents.objects)) + ';';
+    'static const int num_ents = ' + num_ents + ';\n' +
+    'static bhop_Entity entities[' + num_ents + '] =' + CArray(std.map(EntityToStruct, ents.objects)) + ';\n';
 
   local WriteLayer(layer) = WriteLayer_(layer, FindLayer(layer));
 

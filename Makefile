@@ -16,8 +16,8 @@ PSP_EBOOT_TITLE = My Raylib Demo
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak
 
-levels/%.lvl.c: levels/%.json
-	jsonnet -S --tla-code-file lvl=$^ -A name=$(patsubst levels/%.json,%,$^) levels/mkLevel.jsonnet > $@
+levels/%.lvl.c: levels/%.json levels/mkLevel.jsonnet
+	jsonnet -S --tla-code-file lvl=$< -A name=$(patsubst levels/%.json,%,$<) levels/mkLevel.jsonnet > $@
 
 textures/%-fs8.png: textures/%.png
 	rm -f $@
