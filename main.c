@@ -23,7 +23,8 @@
 #include <raylib.h>
 
 #include "controller.h"
-#include "levels/level.h"
+#include "level.h"
+#include "entity.h"
 
 PSP_MODULE_INFO("bunnymark", 0, 1, 1);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
@@ -110,22 +111,32 @@ int main(void)
     level_lapinou.terrainLayer.lifetime = 0;
     level_lapinou.decorLayer.lifetime = 0;
 
-    Bunny *bunnies = (Bunny *)malloc(MAX_BUNNIES*sizeof(Bunny));    // Bunnies array
-
-    int bunniesCount = 0;           // Bunnies counter
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-
-
     bhop_ButtonMap bm = {
         .onCross = bhop_$ButtonEvent({ xflag = pressed; }),
+        .onCircle = bhop_$ButtonEvent({
+                    bhop_Entity *player = bhop_Level_getPlayerEntity(&level_lapinou);
+                    if (player->collider & bhop_EntityCollider_$SOUTH)
+                        player->velocity.y = -8.0f;
+                }),
         .onStart = bhop_$ButtonEvent({ flag = 0; }),
         .onUp = bhop_$ButtonEvent({ up = pressed; }),
         .onDown = bhop_$ButtonEvent({ down = pressed; }),
-        .onLeft = bhop_$ButtonEvent({ left = pressed; }),
-        .onRight = bhop_$ButtonEvent({ right = pressed; })
+        .onLeft = bhop_$ButtonEvent({
+                    left = pressed;
+                    bhop_Entity *player = bhop_Level_getPlayerEntity(&level_lapinou);
+
+                    player->velocity.x = -4.0f;
+                }),
+        .onRight = bhop_$ButtonEvent({
+                    right = pressed;
+                    bhop_Entity *player = bhop_Level_getPlayerEntity(&level_lapinou);
+
+                    player->velocity.x = 4.0f;
+                }),
     };
 
     bhop_ButtonMap_load(&bm);
@@ -142,38 +153,6 @@ int main(void)
         if (down) y = y + 6;
         if (left) x = x - 6;
         if (right) x = x + 6;
-        if (xflag)
-        {
-            //xflag=0;
-            // Create more bunnies
-            for (int i = 0; i < 100; i++)
-            {
-                if (bunniesCount < MAX_BUNNIES)
-                {
-                    bunnies[bunniesCount].position.x = boxB.x;
-                    bunnies[bunniesCount].position.y = boxB.y;
-                    bunnies[bunniesCount].speed.x = (float)GetRandomValue(-250, 250)/60.0f;
-                    bunnies[bunniesCount].speed.y = (float)GetRandomValue(-250, 250)/60.0f;
-                    bunnies[bunniesCount].color = (Color){ GetRandomValue(50, 240),
-                                                       GetRandomValue(80, 240),
-                                                       GetRandomValue(100, 240), 255 };
-                    bunniesCount++;
-                }
-            }
-        }
-
-        // Update bunnies
-        for (int i = 0; i < bunniesCount; i++)
-        {
-            bunnies[i].position.x += bunnies[i].speed.x;
-            bunnies[i].position.y += bunnies[i].speed.y;
-
-            if (((bunnies[i].position.x + texBunny.width/2) > GetScreenWidth()) ||
-                ((bunnies[i].position.x + texBunny.width/2) < 0)) bunnies[i].speed.x *= -1;
-            if (((bunnies[i].position.y + texBunny.height/2) > GetScreenHeight()) ||
-                ((bunnies[i].position.y + texBunny.height/2 - 40) < 0)) bunnies[i].speed.y *= -1;
-        }
-        //----------------------------------------------------------------------------------
 
         // Draw
         //----------------------------------------------------------------------------------
@@ -193,33 +172,20 @@ int main(void)
 
             DrawRectangleRec(boxB, BLUE);
 
-            for (int i = 0; i < bunniesCount; i++)
-            {
-                // NOTE: When internal batch buffer limit is reached (MAX_BATCH_ELEMENTS),
-                // a draw call is launched and buffer starts being filled again;
-                // before issuing a draw call, updated vertex data from internal CPU buffer is send to GPU...
-                // Process of sending data is costly and it could happen that GPU data has not been completely
-                // processed for drawing while new data is tried to be sent (updating current in-use buffers)
-                // it could generates a stall and consequently a frame drop, limiting the number of drawn bunnies
-                DrawTexture(texBunny, (int)bunnies[i].position.x, (int)bunnies[i].position.y, bunnies[i].color);
-            }
-
             bhop_Level_drawEntities(&level_lapinou);
 
             DrawLayer$(bhop_Level_getTerrainTexture(&level_lapinou));
-
-            DrawText(TextFormat("bunnies: %i", bunniesCount), 120, 15, 10, GREEN);
-            DrawText(TextFormat("batched draw calls: %i", 1 + bunniesCount/MAX_BATCH_ELEMENTS), 200, 15, 10, MAROON);
 
             DrawFPS(10, 10);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
+        //
+        bhop_updateEntities(&level_lapinou);
     }
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    free(bunnies);              // Unload bunnies data array
 
     UnloadTexture(texBunny);    // Unload bunny texture
 

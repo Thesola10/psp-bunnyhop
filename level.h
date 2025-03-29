@@ -1,3 +1,6 @@
+#ifndef __LEVEL_H
+#define __LEVEL_H
+
 #include "entity.h"
 
 typedef struct {
@@ -26,3 +29,9 @@ Texture2D bhop_Level_getTerrainTexture(bhop_Level *lvl);
 Texture2D bhop_Level_getDecorTexture(bhop_Level *lvl);
 
 void bhop_Level_drawEntities(bhop_Level *lvl);
+
+bhop_Entity *bhop_Level_getPlayerEntity(bhop_Level *lvl);
+
+int bhop_Level_getTerrainTile(bhop_Level *lvl, Vector2 where);
+
+#endif //__LEVEL_H

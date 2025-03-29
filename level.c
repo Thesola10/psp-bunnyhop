@@ -5,6 +5,8 @@
 Texture2D bhop_levelTileset;
 Image bhop_levelTilesetImg;
 
+bhop_Entity *playerEntity = 0;
+
 void bhop_loadLevelTileset(Texture2D tileset)
 {
     bhop_levelTileset = tileset;
@@ -72,4 +74,27 @@ Texture2D bhop_Level_getDecorTexture(bhop_Level *lvl)
 
     UnloadImage(target);
     return lvl->decorLayer.output;
+}
+
+
+int bhop_Level_getTerrainTile(bhop_Level *lvl, Vector2 where)
+{
+    int tile_idx = (where.y * lvl->terrain_size.x) + where.x;
+
+    return lvl->terrain[tile_idx];
+}
+
+bhop_Entity *bhop_Level_getPlayerEntity(bhop_Level *lvl)
+{
+    if (playerEntity)
+        return playerEntity;
+
+    for (int i = 0; i < lvl->entities_count; i++) {
+        if (lvl->entities[i].type == bhop_Entity_PLAYER) {
+            playerEntity = &lvl->entities[i];
+            break;
+        }
+    }
+
+    return playerEntity;
 }
