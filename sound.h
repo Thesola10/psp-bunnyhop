@@ -29,7 +29,7 @@ void bhop_initSound(void);
 
 void bhop_Sound_play(bhop_Sound *snd);
 
-void bhop_Sound_loadBgm(bhop_Sound *snd);
+void bhop_Sound_loadBgm(bhop_Sound *snd, char loop);
 
 void bhop_refreshSound(void);
 

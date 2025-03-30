@@ -48,6 +48,10 @@ int x;
 int y;
 
 
+int playerHealth = 3;
+
+int playerCooldown = 0;
+
 // This is the maximum amount of elements (quads) per batch
 // NOTE: This value is defined in [rlgl] module and can be changed there
 #define MAX_BATCH_ELEMENTS  8192
@@ -60,6 +64,13 @@ int _flush_cache() {
 
 
 extern bhop_Level level_lapinou;
+
+
+void bhop_drawHealth(Texture2D heart)
+{
+    for (int i = 0; i < playerHealth; i++)
+        DrawTexture(heart, 10 + (26 * i), 10, WHITE);
+}
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -81,14 +92,19 @@ int main(void)
 
     Texture2D texBg = LoadTexture(DATA_PREFIX "/textures/bg-fs8.png");
 
+    Texture2D heart = LoadTexture(DATA_PREFIX "/textures/heart.png");
+
+    Texture2D paf = LoadTexture(DATA_PREFIX "/textures/paf.png");
+
     Image tileset = LoadImage(DATA_PREFIX "/textures/spriteset.png");
 
     bhop_loadLevelTileset(tileset);
 
+
     level_lapinou.terrainLayer.lifetime = 0;
     level_lapinou.decorLayer.lifetime = 0;
 
-
+    bhop_Level_load(&level_lapinou);
 
     bhop_Sound *jumpSound = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/jump.wav");
     bhop_Sound *collectSound = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/collect.wav");
@@ -97,7 +113,9 @@ int main(void)
 
     bhop_Sound *bgm = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/music.wav");
 
-    bhop_Sound_loadBgm(bgm);
+    bhop_Sound *lose = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/lose.wav");
+
+    bhop_Sound_loadBgm(bgm, 1);
     bhop_Player_loadOnBounce(bhop_$EntityEvent({
         bhop_Sound_play(bounceSound);
     }));
@@ -118,8 +136,11 @@ int main(void)
     }));
 
     bhop_Player_loadOnHitEnemy(bhop_$EntityEvent({
-        bhop_Sound_play(hitSound);
-        //TODO: lose points
+        if (!playerCooldown) {
+            bhop_Sound_play(hitSound);
+            playerHealth--;
+            playerCooldown = 10;
+        }
     }));
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
@@ -139,35 +160,66 @@ int main(void)
 
     bhop_ButtonMap_load(&bm);
 
-    for (int i = 0; i < level_lapinou.entities_count; i++) {
-        if (level_lapinou.entities[i].type == bhop_Entity_MUSTACHO)
-            level_lapinou.entities[i].velocity.x = 3.0f;
-    }
+    int losetimer = 0;
+
+    Vector2 losepos;
 
     // Main game loop
     while (flag && !WindowShouldClose()) {
-        // Update
-        bhop_scanButtons();
 
-        bhop_updateEntities(&level_lapinou);
+        bhop_Level *lvl = bhop_getCurrentLevel();
+        // Update
+        bhop_Entity *player = bhop_Level_getPlayerEntity(lvl);
 
         bhop_refreshSound();
+        bhop_scanButtons();
+        if (playerHealth) {
 
-        bhop_Entity *player = bhop_Level_getPlayerEntity(&level_lapinou);
-        //----------------------------------------------------------------------------------
-        if (left) {
-            if (player->collider & bhop_EntityCollider_$SOUTH)
-                player->velocity.x = -4.5f;
-            else if (player->velocity.x > -2.0f)
-                player->velocity.x -= 0.4f;
-        }
-        if (right) {
-            if (player->collider & bhop_EntityCollider_$SOUTH)
-                player->velocity.x = 4.5f;
-            else if (player->velocity.x < 2.0f)
-                player->velocity.x += 0.4f;
-        }
+            bhop_updateEntities(lvl);
 
+            if (playerCooldown)
+                playerCooldown -= 1;
+
+            if (left) {
+                if (player->collider & bhop_EntityCollider_$SOUTH)
+                    player->velocity.x = -4.5f;
+                else if (player->velocity.x > -2.0f)
+                    player->velocity.x -= 0.4f;
+            }
+            if (right) {
+                if (player->collider & bhop_EntityCollider_$SOUTH)
+                    player->velocity.x = 4.5f;
+                else if (player->velocity.x < 2.0f)
+                    player->velocity.x += 0.4f;
+            }
+        } else {
+
+            if (losetimer == 0) {
+                losepos = player->origin;
+                bhop_Sound_loadBgm(0, 0);
+
+            } else if (losetimer == 60) {
+                bhop_Sound_loadBgm(lose, 0);
+                player->velocity.y = -10.0f;
+            } else if (losetimer == 360) {
+                bhop_Level_load(&level_lapinou);
+                losetimer = 0;
+                playerHealth = 3;
+
+                bhop_ButtonMap_load(&bm);
+                bhop_Sound_loadBgm(bgm, 1);
+                continue;
+            }
+
+            // Mario-style game over
+            if (losetimer >= 60) {
+                player->origin.y += player->velocity.y;
+                player->velocity.y += 1.2f;
+            }
+
+            losetimer ++;
+
+        }
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
@@ -182,13 +234,21 @@ int main(void)
 
             DrawLayer$(texBg);
 
-            DrawLayer$(bhop_Level_getDecorTexture(&level_lapinou));
+            DrawLayer$(bhop_Level_getDecorTexture(lvl));
 
-            bhop_Level_drawEntities(&level_lapinou);
+            if (!playerHealth)
+                DrawTexture(paf, losepos.x - 16, losepos.y - 32, WHITE);
 
-            DrawLayer$(bhop_Level_getTerrainTexture(&level_lapinou));
+            if (playerHealth)
+                bhop_Level_drawEntities(lvl);
+            DrawLayer$(bhop_Level_getTerrainTexture(lvl));
 
-            DrawFPS(10, 10);
+            if (!playerHealth)
+                bhop_Level_drawEntities(lvl);
+
+            bhop_drawHealth(heart);
+
+            //DrawFPS(10, 10);
 
         EndDrawing();
         //----------------------------------------------------------------------------------

@@ -15,6 +15,8 @@ bhop_Sound *bgm = 0;
 
 unsigned char *bgm_cursor;
 
+char bgm_loop = 1;
+
 void bhop_initSound(void)
 {
     pspAudioInit();
@@ -41,6 +43,11 @@ void bhop_Sound_play(bhop_Sound *snd)
 
 void _impl_bhop_loadNextBgmChunk(void)
 {
+    if (!bgm) {
+        sceAudioChRelease(CHANNEL_BGM);
+        return;
+    }
+
     long pos = bgm_cursor - bgm->bytes;
     long rem = bgm->data_len - pos;
 
@@ -54,12 +61,15 @@ void _impl_bhop_loadNextBgmChunk(void)
         sceAudioSetChannelDataLen(CHANNEL_BGM, PSP_AUDIO_SAMPLE_ALIGN(rem / 4) - 64);
         sceAudioOutput(CHANNEL_BGM, 0x4000, bgm_cursor);
         bgm_cursor = bgm->bytes;
+
+        if (!bgm_loop)
+            bgm = 0;
     }
  
     return;
 }
 
-void bhop_Sound_loadBgm(bhop_Sound *snd)
+void bhop_Sound_loadBgm(bhop_Sound *snd, char loop)
 {
     int ret = 0;
 
@@ -68,6 +78,7 @@ void bhop_Sound_loadBgm(bhop_Sound *snd)
         return;
     }
 
+    bgm_loop = loop;
     bgm = snd;
     bgm_cursor = snd->bytes + PSP_AUDIO_SAMPLE_MAX*4;
 
@@ -93,8 +104,10 @@ void bhop_refreshSound(void)
         }
     }
 
-    if (! sceAudioGetChannelRestLen(CHANNEL_BGM)) {
-        _impl_bhop_loadNextBgmChunk();
+    if (bgm) {
+        if (! sceAudioGetChannelRestLen(CHANNEL_BGM)) {
+            _impl_bhop_loadNextBgmChunk();
+        }
     }
 }
 

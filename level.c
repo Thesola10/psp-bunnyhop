@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "level.h"
 
 #include "tileset.h"
@@ -6,6 +8,8 @@ Texture2D bhop_levelTileset;
 Image bhop_levelTilesetImg;
 
 bhop_Entity *playerEntity = 0;
+
+bhop_Level *currentLevel;
 
 void bhop_loadLevelTileset(Image tileset)
 {
@@ -20,6 +24,27 @@ void bhop_Level_drawEntities(bhop_Level *lvl)
         Vector2 realPos = (Vector2) { .x = ent.origin.x, .y = ent.origin.y - TILESIZE };
         bhop_drawTile(bhop_levelTileset, ent.type, realPos);
     }
+}
+
+void bhop_Level_load(bhop_Level *lvl)
+{
+    lvl->entities = malloc(lvl->entities_count * sizeof(bhop_Entity));
+
+    for (int i = 0; i < lvl->entities_count; i++) {
+        lvl->entities[i] = lvl->entities_orig[i];
+    }
+
+    for (int i = 0; i < lvl->entities_count; i++) {
+        if (lvl->entities[i].type == bhop_Entity_MUSTACHO)
+            lvl->entities[i].velocity.x = 3.0f;
+    }
+
+    currentLevel = lvl;
+}
+
+bhop_Level *bhop_getCurrentLevel(void)
+{
+    return currentLevel;
 }
 
 Texture2D bhop_Level_getTerrainTexture(bhop_Level *lvl)
