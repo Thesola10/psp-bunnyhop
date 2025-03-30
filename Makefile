@@ -14,7 +14,8 @@ LIBS = -lraylib -lpng -lz -lglut -lGLU -lGL -lpspvfpu -lpspaudio -lpspaudiolib
 
 
 EXTRA_TARGETS = EBOOT.PBP textures/bg-fs8.png textures/spriteset-fs8.png
-PSP_EBOOT_TITLE = My Raylib Demo
+PSP_EBOOT_TITLE = BunnyHop
+PSP_EBOOT_ICON = banner.png
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak
 
