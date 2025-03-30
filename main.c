@@ -24,6 +24,7 @@
 
 #include <raylib.h>
 
+#include "tileset.h"
 #include "controller.h"
 #include "level.h"
 #include "entity.h"
@@ -47,8 +48,11 @@ int xflag=0;
 int x;
 int y;
 
+extern Texture2D bhop_levelTileset;
 
 int playerHealth = 3;
+
+int playerScore = 0;
 
 int playerCooldown = 0;
 
@@ -69,7 +73,16 @@ extern bhop_Level level_lapinou;
 void bhop_drawHealth(Texture2D heart)
 {
     for (int i = 0; i < playerHealth; i++)
-        DrawTexture(heart, 10 + (26 * i), 10, WHITE);
+        DrawTexture(heart, 10 + (20 * i), 10, WHITE);
+}
+
+void bhop_drawScore(void)
+{
+    Texture2D tileset = bhop_levelTileset;
+
+    for (int i = 0; i < playerScore; i++)
+        bhop_drawTile(tileset, bhop_Entity_EGG,
+                (Vector2) { .x = 470 - (16 + (20 * i)), .y = 10 });
 }
 
 //------------------------------------------------------------------------------------
@@ -114,6 +127,7 @@ int main(void)
     bhop_Sound *bgm = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/music.wav");
 
     bhop_Sound *lose = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/lose.wav");
+    bhop_Sound *win = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/win.wav");
 
     bhop_Sound_loadBgm(bgm, 1);
     bhop_Player_loadOnBounce(bhop_$EntityEvent({
@@ -133,6 +147,7 @@ int main(void)
     bhop_Player_loadOnCollectCoins(bhop_$EntityEvent({
         bhop_Sound_play(collectSound);
         target->type = bhop_Entity_NULL;
+        playerScore += 1;
     }));
 
     bhop_Player_loadOnHitEnemy(bhop_$EntityEvent({
@@ -160,7 +175,7 @@ int main(void)
 
     bhop_ButtonMap_load(&bm);
 
-    int losetimer = 0;
+    int timer = 0;
 
     Vector2 losepos;
 
@@ -173,7 +188,18 @@ int main(void)
 
         bhop_refreshSound();
         bhop_scanButtons();
-        if (playerHealth) {
+
+        if (playerScore >= 3) {
+            if (timer == 0) {
+                bhop_Sound_loadBgm(0, 0);
+            }
+
+            else if (timer == 30) {
+                bhop_Sound_loadBgm(win, 0);
+            }
+
+            timer++;
+        } else if (playerHealth) {
 
             bhop_updateEntities(lvl);
 
@@ -194,17 +220,18 @@ int main(void)
             }
         } else {
 
-            if (losetimer == 0) {
+            if (timer == 0) {
                 losepos = player->origin;
                 bhop_Sound_loadBgm(0, 0);
 
-            } else if (losetimer == 60) {
+            } else if (timer == 60) {
                 bhop_Sound_loadBgm(lose, 0);
                 player->velocity.y = -10.0f;
-            } else if (losetimer == 360) {
+            } else if (timer == 360) {
                 bhop_Level_load(&level_lapinou);
-                losetimer = 0;
+                timer = 0;
                 playerHealth = 3;
+                playerScore = 0;
 
                 bhop_ButtonMap_load(&bm);
                 bhop_Sound_loadBgm(bgm, 1);
@@ -212,12 +239,12 @@ int main(void)
             }
 
             // Mario-style game over
-            if (losetimer >= 60) {
+            if (timer >= 60) {
                 player->origin.y += player->velocity.y;
                 player->velocity.y += 1.2f;
             }
 
-            losetimer ++;
+            timer ++;
 
         }
         // Draw
@@ -247,6 +274,7 @@ int main(void)
                 bhop_Level_drawEntities(lvl);
 
             bhop_drawHealth(heart);
+            bhop_drawScore();
 
             //DrawFPS(10, 10);
 

@@ -40,6 +40,8 @@ void bhop_Level_load(bhop_Level *lvl)
     }
 
     currentLevel = lvl;
+
+    playerEntity = 0;
 }
 
 bhop_Level *bhop_getCurrentLevel(void)
