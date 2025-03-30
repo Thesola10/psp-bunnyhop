@@ -54,22 +54,27 @@ void _impl_bhop_Entity_updateTileCollision(bhop_Entity *ent, bhop_Level *lvl)
     int tile_swf = bhop_Level_getTerrainTile(lvl, (Vector2) {.x = tile_x,     .y = tile_yf});
     int tile_sef = bhop_Level_getTerrainTile(lvl, (Vector2) {.x = tile_x + 1, .y = tile_yf});
 
-    ent->collider = 0;
+    if (ent->collider) { // Debounce, skip this round
+        ent->collider = 0;
+        return;
+    }
 
     if (tile_nw == 0 && tile_ne == 0) { // Corners
         if (tile_swf || tile_sef || tile_sw || tile_se) {
             ent->collider ^= bhop_EntityCollider_$SOUTH;
+            ent->origin.y -= clamp_y;
         }
 
-        if (tile_sw || tile_se)
-            ent->origin.y -= clamp_y;
+        //if (tile_sw || tile_se)
+        //    ent->origin.y -= clamp_y;
     } else {
         if ((tile_swf && tile_sef) || (tile_sw && tile_se)) {
             ent->collider ^= bhop_EntityCollider_$SOUTH;
+            ent->origin.y -= clamp_y;
         }
 
-        if (tile_sw || tile_se)
-            ent->origin.y -= clamp_y;
+        //if (tile_sw || tile_se)
+        //    ent->origin.y -= clamp_y;
     }
 
     if (tile_sw && tile_nw) {

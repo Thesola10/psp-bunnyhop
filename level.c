@@ -7,10 +7,10 @@ Image bhop_levelTilesetImg;
 
 bhop_Entity *playerEntity = 0;
 
-void bhop_loadLevelTileset(Texture2D tileset)
+void bhop_loadLevelTileset(Image tileset)
 {
-    bhop_levelTileset = tileset;
-    bhop_levelTilesetImg = LoadImageFromTexture(tileset);
+    bhop_levelTileset = LoadTextureFromImage(tileset);
+    bhop_levelTilesetImg = tileset;
 }
 
 void bhop_Level_drawEntities(bhop_Level *lvl)

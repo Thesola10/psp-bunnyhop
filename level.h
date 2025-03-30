@@ -23,7 +23,7 @@ struct _impl_bhop_Level {
 typedef struct _impl_bhop_Level bhop_Level;
 
 
-void bhop_loadLevelTileset(Texture2D tileset);
+void bhop_loadLevelTileset(Image tileset);
 
 Texture2D bhop_Level_getTerrainTexture(bhop_Level *lvl);
 Texture2D bhop_Level_getDecorTexture(bhop_Level *lvl);

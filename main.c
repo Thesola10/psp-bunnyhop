@@ -29,7 +29,7 @@
 #include "entity.h"
 #include "sound.h"
 
-PSP_MODULE_INFO("bunnymark", 0, 1, 1);
+PSP_MODULE_INFO("bunnyhop", 0, 1, 1);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
 
 #define ATTR_PSP_WIDTH 480
@@ -47,18 +47,10 @@ int xflag=0;
 int x;
 int y;
 
-#define MAX_BUNNIES        50000    // 50K bunnies limit
 
 // This is the maximum amount of elements (quads) per batch
 // NOTE: This value is defined in [rlgl] module and can be changed there
 #define MAX_BATCH_ELEMENTS  8192
-
-typedef struct Bunny {
-    Vector2 position;
-    Vector2 speed;
-    Color color;
-} Bunny;
-
 
 char up, down, left, right;
 
@@ -79,7 +71,7 @@ int main(void)
     const int screenWidth = ATTR_PSP_WIDTH;
     const int screenHeight = ATTR_PSP_HEIGHT;
 
-    InitWindow(screenWidth, screenHeight, "raylib [textures] example - bunnymark");
+    InitWindow(screenWidth, screenHeight, "BunnyHop!");
 
 
     bhop_initSound();
@@ -87,23 +79,25 @@ int main(void)
     x=screenWidth/2;
     y=screenHeight/2;
 
-    Rectangle boxB= { GetScreenWidth()/2.0f, GetScreenHeight()/2.0f, 6, 6 };
-    // Load bunny texture
-    Texture2D texBunny = LoadTexture(DATA_PREFIX "/textures/bunnymark/wabbit_alpha.png");
+    Texture2D texBg = LoadTexture(DATA_PREFIX "/textures/bg-fs8.png");
 
-    Image imgBg = LoadImage(DATA_PREFIX "/textures/bg-fs8.png");
-    Texture2D texBg = LoadTextureFromImage(imgBg);
+    Image tileset = LoadImage(DATA_PREFIX "/textures/spriteset.png");
 
-    bhop_loadLevelTileset(LoadTexture(DATA_PREFIX "/textures/spriteset-fs8.png"));
+    bhop_loadLevelTileset(tileset);
 
     level_lapinou.terrainLayer.lifetime = 0;
     level_lapinou.decorLayer.lifetime = 0;
+
+
 
     bhop_Sound *jumpSound = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/jump.wav");
     bhop_Sound *collectSound = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/collect.wav");
     bhop_Sound *hitSound = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/hit.wav");
     bhop_Sound *bounceSound = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/bounce.wav");
 
+    bhop_Sound *bgm = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/music.wav");
+
+    bhop_Sound_loadBgm(bgm);
     bhop_Player_loadOnBounce(bhop_$EntityEvent({
         bhop_Sound_play(bounceSound);
     }));
@@ -160,12 +154,7 @@ int main(void)
         bhop_refreshSound();
 
         bhop_Entity *player = bhop_Level_getPlayerEntity(&level_lapinou);
-        // Update player-controlled-box (box02)
-        boxB.x = x - boxB.width/2;
-        boxB.y = y - boxB.height/2;
         //----------------------------------------------------------------------------------
-        if (up)  y = y - 6;
-        if (down) y = y + 6;
         if (left) {
             if (player->collider & bhop_EntityCollider_$SOUTH)
                 player->velocity.x = -4.5f;
@@ -175,7 +164,7 @@ int main(void)
         if (right) {
             if (player->collider & bhop_EntityCollider_$SOUTH)
                 player->velocity.x = 4.5f;
-            else if (player->velocity.x < 4.0f)
+            else if (player->velocity.x < 2.0f)
                 player->velocity.x += 0.4f;
         }
 
@@ -195,8 +184,6 @@ int main(void)
 
             DrawLayer$(bhop_Level_getDecorTexture(&level_lapinou));
 
-            DrawRectangleRec(boxB, BLUE);
-
             bhop_Level_drawEntities(&level_lapinou);
 
             DrawLayer$(bhop_Level_getTerrainTexture(&level_lapinou));
@@ -210,8 +197,6 @@ int main(void)
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-
-    UnloadTexture(texBunny);    // Unload bunny texture
 
 
     UnloadTexture(texBg);

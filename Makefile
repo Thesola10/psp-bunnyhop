@@ -10,7 +10,7 @@ ASFLAGS = $(CFLAGS)
 
 LIBDIR =
 LDFLAGS =
-LIBS =   -lraylib -lpng -lz -lglut -lGLU -lGL -lpspvfpu -lpspaudio -lpspaudiolib
+LIBS = -lraylib -lpng -lz -lglut -lGLU -lGL -lpspvfpu -lpspaudio -lpspaudiolib
 
 
 EXTRA_TARGETS = EBOOT.PBP textures/bg-fs8.png textures/spriteset-fs8.png
