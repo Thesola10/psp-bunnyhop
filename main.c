@@ -63,28 +63,6 @@ int _flush_cache() {
 }
 
 
-#define TILESIZE 16
-
-void printTile(Texture2D tileset, int tileId, Vector2 where)
-{
-    int workId = tileId - 1;
-
-    int tilex = workId % (tileset.width / TILESIZE);
-    int tiley = workId / (tileset.width / TILESIZE);
-
-    Rectangle subTile = (Rectangle) {
-        .width = TILESIZE,
-        .height = TILESIZE,
-        .x = tilex * TILESIZE,
-        .y = tiley * TILESIZE
-    };
-
-    if (!tileId) return;
-
-    DrawTextureRec(tileset, subTile, where, WHITE);
-}
-
-
 extern bhop_Level level_lapinou;
 
 //------------------------------------------------------------------------------------
@@ -149,6 +127,7 @@ int main(void)
                     bhop_Entity *player = bhop_Level_getPlayerEntity(&level_lapinou);
                     if (playerTiming.cdSouth || playerTiming.cdEast || playerTiming.cdWest)
                         player->velocity.y = -10.0f;
+                        bhop_Sound_play(jumpSound);
                 }),
         .onStart = bhop_$ButtonEvent({ flag = 0; }),
         .onUp = bhop_$ButtonEvent({ up = pressed; }),

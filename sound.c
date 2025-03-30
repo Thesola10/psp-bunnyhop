@@ -2,6 +2,7 @@
 #include <pspaudiolib.h>
 #include <pspiofilemgr.h>
 #include <stdlib.h>
+#include <raylib.h>
 
 #include "sound.h"
 
@@ -17,7 +18,12 @@ void bhop_initSound(void)
 
 void bhop_Sound_play(bhop_Sound *snd)
 {
-    sceAudioChReserve(CHANNEL_SFX, snd->data_len / (snd->sample_rate * 2 * 2), PSP_AUDIO_FORMAT_STEREO);
+    if (!snd) return;
+
+    TraceLog(LOG_INFO, "Playing %d samples @%d/%dch\n",
+            snd->data_len / 4, snd->sample_rate, snd->num_channels);
+
+    sceAudioChReserve(CHANNEL_SFX, snd->data_len / (2 * 2), PSP_AUDIO_FORMAT_STEREO);
     sceAudioOutput(CHANNEL_SFX, 0x6000, snd->bytes);
     //sceAudioChRelease(CHANNEL_SFX);
 }
@@ -53,7 +59,8 @@ bhop_Sound *bhop_Sound_loadFromFile(char *path)
     SceIoStat sndStat;
     _impl_bhop_RawSound result;
 
-    sceIoGetstat(path, &sndStat);
+    if (sceIoGetstat(path, &sndStat))
+        return 0;
     sndFile = sceIoOpen(path, PSP_O_RDONLY, 0777);
 
     result.data = malloc(sndStat.st_size);

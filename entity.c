@@ -86,6 +86,8 @@ void _impl_bhop_Entity_updateMovement(bhop_Entity *ent)
     if (bhop_Entity_isBouncy$(*ent)) {
         if (ent->collider & bhop_EntityCollider_$SOUTH) {
             ent->velocity.y = - 8.0f;
+            if (ent->type == bhop_Entity_PLAYER)
+                onPlayerBounce(ent);
         }
         if (ent->collider & bhop_EntityCollider_$WEST) {
             ent->velocity.x = fabs(ent->velocity.x);
@@ -163,7 +165,7 @@ void bhop_updateEntities(bhop_Level *lvl)
 #define _impl_bhop_EntityEvent_callIfExists$(handler) { \
         if ( handler != (void*) 0 ) { handler ( ent ); } \
         else                        { TraceLog(LOG_INFO, "Empty handler: " #handler "\n" ); }\
-    }; break
+    break; }
 
         if (_impl_bhop_Entity_intersects(player, ent)) {
             switch (ent->type) {
