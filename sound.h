@@ -34,3 +34,4 @@ void bhop_Sound_loadBgm(bhop_Sound *snd);
 void bhop_refreshSound(void);
 
 bhop_Sound *bhop_Sound_loadFromFile(char *path);
+void bhop_Sound_unload(bhop_Sound *sound);

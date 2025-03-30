@@ -12,7 +12,7 @@
 
 bhop_Entity *player;
 
-bhop_PlayerTiming playerTiming;
+int playerJumpCd = 0;
 
 bhop_EntityEvent onPlayerJump = 0;
 bhop_EntityEvent onPlayerBounce = 0;
@@ -129,6 +129,9 @@ void bhop_updateEntities(bhop_Level *lvl)
 {
     bhop_Entity *player = bhop_Level_getPlayerEntity(lvl);
 
+    if (playerJumpCd)
+        playerJumpCd--;
+
     for (int i = 0; i < lvl->entities_count; i++) {
         bhop_Entity *ent = &lvl->entities[i];
 
@@ -141,23 +144,9 @@ void bhop_updateEntities(bhop_Level *lvl)
         }
 
         if (ent == player) {
-            if (playerTiming.cdSouth)
-                playerTiming.cdSouth -= 1;
-            if (playerTiming.cdWest)
-                playerTiming.cdWest -= 1;
-            if (playerTiming.cdEast)
-                playerTiming.cdEast -= 1;
-            if (playerTiming.cdNorth)
-                playerTiming.cdNorth -= 1;
-
             if (player->collider & bhop_EntityCollider_$SOUTH)
-                playerTiming.cdSouth = 3;
-            if (player->collider & bhop_EntityCollider_$NORTH)
-                playerTiming.cdNorth = 3;
-            if (player->collider & bhop_EntityCollider_$EAST)
-                playerTiming.cdEast = 3;
-            if (player->collider & bhop_EntityCollider_$WEST)
-                playerTiming.cdWest = 3;
+                if (playerJumpCd)
+                    onPlayerJump(ent);
 
             continue;
         }

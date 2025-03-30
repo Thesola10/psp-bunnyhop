@@ -38,12 +38,6 @@ typedef struct {
     bhop_EntityCollider collider;
 } bhop_Entity;
 
-typedef struct {
-    int cdNorth;
-    int cdSouth;
-    int cdEast;
-    int cdWest;
-} bhop_PlayerTiming;
 
 #if defined(__clang__)
 
@@ -67,8 +61,7 @@ typedef struct {
 #define bhop_$EntityEvent(x) \
     _impl_bhop_$EntityEvent(__COUNTER__, x)
 
-
-extern bhop_PlayerTiming playerTiming;
+extern int playerJumpCd;
 
 void bhop_Entity_jump(bhop_Entity *entity);
 void bhop_Entity_walk(bhop_Entity *entity);

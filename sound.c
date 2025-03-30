@@ -71,3 +71,9 @@ bhop_Sound *bhop_Sound_loadFromFile(char *path)
 
     return result.snd;
 }
+
+void bhop_Sound_unload(bhop_Sound *snd)
+{
+    if (snd)
+        free(snd);
+}

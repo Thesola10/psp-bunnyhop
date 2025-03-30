@@ -35,6 +35,10 @@ PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
 #define ATTR_PSP_WIDTH 480
 #define ATTR_PSP_HEIGHT 272
 
+#ifndef DATA_PREFIX
+# define DATA_PREFIX "host0:"
+#endif
+
 SceCtrlData pad;
 
 
@@ -85,26 +89,27 @@ int main(void)
 
     Rectangle boxB= { GetScreenWidth()/2.0f, GetScreenHeight()/2.0f, 6, 6 };
     // Load bunny texture
-    Texture2D texBunny = LoadTexture("host0:/textures/bunnymark/wabbit_alpha.png");
+    Texture2D texBunny = LoadTexture(DATA_PREFIX "/textures/bunnymark/wabbit_alpha.png");
 
-    Image imgBg = LoadImage("host0:/textures/bg-fs8.png");
+    Image imgBg = LoadImage(DATA_PREFIX "/textures/bg-fs8.png");
     Texture2D texBg = LoadTextureFromImage(imgBg);
 
-    bhop_loadLevelTileset(LoadTexture("host0:/textures/spriteset-fs8.png"));
+    bhop_loadLevelTileset(LoadTexture(DATA_PREFIX "/textures/spriteset-fs8.png"));
 
     level_lapinou.terrainLayer.lifetime = 0;
     level_lapinou.decorLayer.lifetime = 0;
 
-    bhop_Sound *bounceSound = bhop_Sound_loadFromFile("host0:/sounds/bounce.wav");
-    bhop_Sound *jumpSound = bhop_Sound_loadFromFile("host0:/sounds/jump.wav");
-    bhop_Sound *collectSound = bhop_Sound_loadFromFile("host0:/sounds/collect.wav");
-    bhop_Sound *hitSound = bhop_Sound_loadFromFile("host0:/sounds/hit.wav");
+    bhop_Sound *jumpSound = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/jump.wav");
+    bhop_Sound *collectSound = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/collect.wav");
+    bhop_Sound *hitSound = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/hit.wav");
+    bhop_Sound *bounceSound = bhop_Sound_loadFromFile(DATA_PREFIX "/sounds/bounce.wav");
 
     bhop_Player_loadOnBounce(bhop_$EntityEvent({
         bhop_Sound_play(bounceSound);
     }));
 
     bhop_Player_loadOnJump(bhop_$EntityEvent({
+        target->velocity.y = -10.0f;
         bhop_Sound_play(jumpSound);
     }));
 
@@ -124,10 +129,7 @@ int main(void)
     bhop_ButtonMap bm = {
         .onCross = bhop_$ButtonEvent({ xflag = pressed; }),
         .onCircle = bhop_$ButtonEvent({
-                    bhop_Entity *player = bhop_Level_getPlayerEntity(&level_lapinou);
-                    if (playerTiming.cdSouth || playerTiming.cdEast || playerTiming.cdWest)
-                        player->velocity.y = -10.0f;
-                        bhop_Sound_play(jumpSound);
+                    playerJumpCd = 4;
                 }),
         .onStart = bhop_$ButtonEvent({ flag = 0; }),
         .onUp = bhop_$ButtonEvent({ up = pressed; }),
@@ -157,7 +159,7 @@ int main(void)
         if (left) {
             if (player->collider & bhop_EntityCollider_$SOUTH)
                 player->velocity.x = -4.5f;
-            else if (player->velocity.x > -4.0f)
+            else if (player->velocity.x > -2.0f)
                 player->velocity.x -= 0.4f;
         }
         if (right) {
@@ -203,6 +205,11 @@ int main(void)
 
 
     UnloadTexture(texBg);
+
+    bhop_Sound_unload(hitSound);
+    bhop_Sound_unload(bounceSound);
+    bhop_Sound_unload(jumpSound);
+    bhop_Sound_unload(collectSound);
 
     CloseWindow();              // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
