@@ -145,6 +145,11 @@ int main(void)
 
     bhop_ButtonMap_load(&bm);
 
+    for (int i = 0; i < level_lapinou.entities_count; i++) {
+        if (level_lapinou.entities[i].type == bhop_Entity_MUSTACHO)
+            level_lapinou.entities[i].velocity.x = 3.0f;
+    }
+
     // Main game loop
     while (flag && !WindowShouldClose()) {
         // Update

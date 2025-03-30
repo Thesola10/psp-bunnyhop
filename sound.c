@@ -7,9 +7,13 @@
 #include "sound.h"
 
 const int CHANNEL_SFX = 1;
-const int CHANNEL_BGM = 2;
+const int CHANNEL_BGM = 5;
+
+char SFXTAB[4] = { 0, 0, 0, 0 };
 
 bhop_Sound *bgm = 0;
+
+unsigned char *bgm_cursor;
 
 void bhop_initSound(void)
 {
@@ -20,31 +24,57 @@ void bhop_Sound_play(bhop_Sound *snd)
 {
     if (!snd) return;
 
+    int sfxc = 0;
+
+    for (; sfxc < 4; sfxc++) {
+        if (!SFXTAB[sfxc])
+            break;
+    }
+
     TraceLog(LOG_INFO, "Playing %d samples @%d/%dch\n",
             snd->data_len / 4, snd->sample_rate, snd->num_channels);
 
-    sceAudioChReserve(CHANNEL_SFX, snd->data_len / (2 * 2), PSP_AUDIO_FORMAT_STEREO);
-    sceAudioOutput(CHANNEL_SFX, 0x6000, snd->bytes);
-    //sceAudioChRelease(CHANNEL_SFX);
+    sceAudioChReserve(sfxc, PSP_AUDIO_SAMPLE_ALIGN(snd->data_len / (2 * 2)), PSP_AUDIO_FORMAT_STEREO);
+    SFXTAB[sfxc] = 1;
+    sceAudioOutput(sfxc, 0x6000, snd->bytes);
+}
+
+void _impl_bhop_loadNextBgmChunk(void)
+{
+    int pos = bgm_cursor - bgm->bytes;
+    int rem = bgm->data_len - pos;
+
+    sceAudioChRelease(CHANNEL_BGM);
+    if (rem < PSP_AUDIO_CHANNEL_MAX) {
+        sceAudioChReserve(CHANNEL_BGM, PSP_AUDIO_SAMPLE_ALIGN(rem / 4), PSP_AUDIO_FORMAT_STEREO);
+        sceAudioOutput(CHANNEL_BGM, 0x4000, bgm_cursor);
+        bgm_cursor = bgm->bytes;
+    } else {
+        sceAudioChReserve(CHANNEL_BGM, PSP_AUDIO_CHANNEL_MAX, PSP_AUDIO_FORMAT_STEREO);
+        sceAudioOutput(CHANNEL_BGM, 0x4000, bgm_cursor);
+        bgm_cursor += PSP_AUDIO_CHANNEL_MAX*4;
+    }
 }
 
 void bhop_Sound_loadBgm(bhop_Sound *snd)
 {
     bgm = snd;
+    bgm_cursor = snd->bytes;
 }
 
 void bhop_refreshSound(void)
 {
-    if (! sceAudioGetChannelRestLen(CHANNEL_SFX)) {
-        sceAudioChRelease(CHANNEL_SFX);
+    for (int i = 0; i < 4; i++) {
+        if (SFXTAB[i]) {
+            if (! sceAudioGetChannelRestLen(i)) {
+                sceAudioChRelease(i);
+                SFXTAB[i] = 0;
+            }
+        }
     }
 
     if (! sceAudioGetChannelRestLen(CHANNEL_BGM)) {
-        sceAudioChRelease(CHANNEL_BGM);
-        if (bgm) {
-            sceAudioChReserve(CHANNEL_BGM, bgm->data_len / (bgm->sample_rate * 2 * 2), PSP_AUDIO_FORMAT_STEREO);
-            sceAudioOutput(CHANNEL_BGM, 0x4000, bgm->bytes);
-        }
+        _impl_bhop_loadNextBgmChunk();
     }
 }
 
@@ -63,7 +93,7 @@ bhop_Sound *bhop_Sound_loadFromFile(char *path)
         return 0;
     sndFile = sceIoOpen(path, PSP_O_RDONLY, 0777);
 
-    result.data = malloc(sndStat.st_size);
+    result.data = malloc(sndStat.st_size + 32);
 
     sceIoRead(sndFile, result.data, sndStat.st_size);
 

@@ -37,32 +37,39 @@ char _impl_bhop_Entity_intersects(bhop_Entity *ent1, bhop_Entity *ent2) {
 void _impl_bhop_Entity_updateTileCollision(bhop_Entity *ent, bhop_Level *lvl)
 {
     int clamp_x, clamp_y;
-    int tile_x, tile_y;
+    int tile_x, tile_y, tile_yf;
 
     clamp_x = ((int) ent->origin.x) % TILESIZE;
     clamp_y = ((int) ent->origin.y) % TILESIZE;
 
     tile_x = ((int) ent->origin.x) / TILESIZE;
+    tile_y = ((int) ent->origin.y) / TILESIZE;
 
-    tile_y = ((int) ent->origin.y + ent->velocity.y) / TILESIZE;
+    tile_yf = ((int) ent->origin.y + ent->velocity.y) / TILESIZE;
 
     int tile_nw = bhop_Level_getTerrainTile(lvl, (Vector2) {.x = tile_x,     .y = tile_y - 1});
     int tile_ne = bhop_Level_getTerrainTile(lvl, (Vector2) {.x = tile_x + 1, .y = tile_y - 1});
     int tile_sw = bhop_Level_getTerrainTile(lvl, (Vector2) {.x = tile_x,     .y = tile_y});
     int tile_se = bhop_Level_getTerrainTile(lvl, (Vector2) {.x = tile_x + 1, .y = tile_y});
+    int tile_swf = bhop_Level_getTerrainTile(lvl, (Vector2) {.x = tile_x,     .y = tile_yf});
+    int tile_sef = bhop_Level_getTerrainTile(lvl, (Vector2) {.x = tile_x + 1, .y = tile_yf});
 
     ent->collider = 0;
 
     if (tile_nw == 0 && tile_ne == 0) { // Corners
-        if (tile_sw || tile_se) {
+        if (tile_swf || tile_sef || tile_sw || tile_se) {
             ent->collider ^= bhop_EntityCollider_$SOUTH;
-            ent->origin.y -= clamp_y;
         }
+
+        if (tile_sw || tile_se)
+            ent->origin.y -= clamp_y;
     } else {
-        if (tile_sw && tile_se) {
+        if ((tile_swf && tile_sef) || (tile_sw && tile_se)) {
             ent->collider ^= bhop_EntityCollider_$SOUTH;
-            ent->origin.y -= clamp_y;
         }
+
+        if (tile_sw || tile_se)
+            ent->origin.y -= clamp_y;
     }
 
     if (tile_sw && tile_nw) {
@@ -90,19 +97,17 @@ void _impl_bhop_Entity_updateMovement(bhop_Entity *ent)
             if (ent->type == bhop_Entity_PLAYER)
                 onPlayerBounce(ent);
         }
-        if (ent->collider & bhop_EntityCollider_$WEST) {
-            ent->velocity.x = fabs(ent->velocity.x);
-        } else if (ent->collider & bhop_EntityCollider_$EAST) {
-            ent->velocity.x = - fabs(ent->velocity.x);
-        }
+
     } else {
         if (ent->collider & bhop_EntityCollider_$SOUTH) {
             ent->velocity.y = 0.0f;
         }
-        if (ent->collider & (bhop_EntityCollider_$WEST | bhop_EntityCollider_$EAST))
-            ent->velocity.x = 0.0f;
     }
-
+    if (ent->collider & bhop_EntityCollider_$WEST) {
+        ent->velocity.x = fabs(ent->velocity.x);
+    } else if (ent->collider & bhop_EntityCollider_$EAST) {
+        ent->velocity.x = - fabs(ent->velocity.x);
+    }
     if (ent->collider & bhop_EntityCollider_$NORTH)
         ent->velocity.y = 0.0f;
     if (! (ent->collider & bhop_EntityCollider_$SOUTH)) {
@@ -160,6 +165,7 @@ void bhop_updateEntities(bhop_Level *lvl)
 
             continue;
         }
+
 
 #define _impl_bhop_EntityEvent_callIfExists$(handler) { \
         if ( handler != (void*) 0 ) { handler ( ent ); } \
