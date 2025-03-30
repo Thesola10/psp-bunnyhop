@@ -4,7 +4,7 @@ OBJS = controller.o level.o entity.o tileset.o sound.o main.o \
 	   levels/lapinou.lvl.o
 INCDIR =
 DATA_PREFIX := host0:
-CFLAGS = -Wall -DDATA_PREFIX=\"$(DATA_PREFIX)\"
+CFLAGS = -Wall -DDATA_PREFIX=\"$(DATA_PREFIX)\" -ggdb
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 
