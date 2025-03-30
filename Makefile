@@ -1,6 +1,6 @@
 BUILD_PRX = 1
 TARGET = raylib
-OBJS = controller.o level.o entity.o tileset.o main.o \
+OBJS = controller.o level.o entity.o tileset.o sound.o main.o \
 	   levels/lapinou.lvl.o
 INCDIR =
 CFLAGS = -Wall
@@ -9,7 +9,7 @@ ASFLAGS = $(CFLAGS)
 
 LIBDIR =
 LDFLAGS =
-LIBS =   -lraylib -lpng -lz -lglut -lGLU -lGL -lpspvfpu
+LIBS =   -lraylib -lpng -lz -lglut -lGLU -lGL -lpspvfpu -lpspaudio -lpspaudiolib
 
 EXTRA_TARGETS = EBOOT.PBP textures/bg-fs8.png textures/spriteset-fs8.png
 PSP_EBOOT_TITLE = My Raylib Demo

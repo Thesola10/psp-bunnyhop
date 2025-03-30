@@ -45,10 +45,40 @@ typedef struct {
     int cdWest;
 } bhop_PlayerTiming;
 
+#if defined(__clang__)
+
+  typedef void (^bhop_EntityEvent)(bhop_Entity *target);
+  # define _impl_bhop_$EntityEventBlock(n, x) \
+    ^ void (bhop_Entity *target) x
+
+#elif defined(__GNUC__)
+
+  typedef void (*bhop_EntityEvent)(bhop_Entity *target);
+  #define _impl_bhop_$EntityEventBlock(n, x) \
+    ({ void _gen_bhop_EntityEventHandler_##n (bhop_Entity *target) x; \
+       _gen_bhop_EntityEventHandler_##n; \
+    })
+
+#endif
+
+#define _impl_bhop_$EntityEvent(n, x) \
+    _impl_bhop_$EntityEventBlock(n, x)
+
+#define bhop_$EntityEvent(x) \
+    _impl_bhop_$EntityEvent(__COUNTER__, x)
+
+
 extern bhop_PlayerTiming playerTiming;
 
 void bhop_Entity_jump(bhop_Entity *entity);
 void bhop_Entity_walk(bhop_Entity *entity);
 void bhop_updateEntities(bhop_Level *lvl);
+
+
+void bhop_Player_loadOnJump(bhop_EntityEvent e);
+void bhop_Player_loadOnBounce(bhop_EntityEvent e);
+
+void bhop_Player_loadOnCollectCoins(bhop_EntityEvent e);
+void bhop_Player_loadOnHitEnemy(bhop_EntityEvent e);
 
 #endif //__ENTITY_H

@@ -14,6 +14,13 @@ bhop_Entity *player;
 
 bhop_PlayerTiming playerTiming;
 
+bhop_EntityEvent onPlayerJump = 0;
+bhop_EntityEvent onPlayerBounce = 0;
+
+bhop_EntityEvent onPlayerCollectCoins = 0;
+bhop_EntityEvent onPlayerHitEnemy = 0;
+
+
 Rectangle _impl_bhop_Entity_getRect(bhop_Entity *entity) {
   return (Rectangle){.height = TILESIZE,
                      .width = TILESIZE,
@@ -24,37 +31,6 @@ Rectangle _impl_bhop_Entity_getRect(bhop_Entity *entity) {
 char _impl_bhop_Entity_intersects(bhop_Entity *ent1, bhop_Entity *ent2) {
   return CheckCollisionRecs(_impl_bhop_Entity_getRect(ent1),
                             _impl_bhop_Entity_getRect(ent2));
-}
-void bhop_Entity_jump(bhop_Entity *entity)
-{
-    switch (entity->type) {
-    case bhop_Entity_PLAYER:
-        if (entity->collider & bhop_EntityCollider_$SOUTH) {
-            entity->velocity = (Vector2){.x = BUNNYHOPSPEED, .y = JUMPHEIGHT};
-        }
-        break;
-  case bhop_Entity_MUSTACHO: {
-    if (entity->collider & bhop_EntityCollider_$SOUTH) {
-      entity->velocity = (Vector2){.x = entity->velocity.x, .y = JUMPHEIGHT};
-    }
-    break;
-  }
-  default:
-    assert(0);
-  }
-}
-
-void bhop_Entity_walk(bhop_Entity *entity) {
-  switch (entity->type) {
-  case bhop_Entity_MUSTACHO: {
-    if (entity->collider & bhop_EntityCollider_$SOUTH) {
-      entity->velocity = (Vector2){.x = WALKSPEED, .y = entity->velocity.y};
-    }
-    break;
-  }
-  default:
-    assert(0);
-  }
 }
 
 void _impl_bhop_Entity_updateTileCollision(bhop_Entity *ent, bhop_Level *lvl)
@@ -131,6 +107,22 @@ void _impl_bhop_Entity_updateMovement(bhop_Entity *ent)
     }
 }
 
+void bhop_Player_loadOnBounce(bhop_EntityEvent evt) {
+    onPlayerBounce = evt;
+}
+
+void bhop_Player_loadOnJump(bhop_EntityEvent evt) {
+    onPlayerJump = evt;
+}
+
+void bhop_Player_loadOnHitEnemy(bhop_EntityEvent evt) {
+    onPlayerHitEnemy = evt;
+}
+
+void bhop_Player_loadOnCollectCoins(bhop_EntityEvent evt) {
+    onPlayerCollectCoins = evt;
+}
+
 void bhop_updateEntities(bhop_Level *lvl)
 {
     bhop_Entity *player = bhop_Level_getPlayerEntity(lvl);
@@ -168,7 +160,21 @@ void bhop_updateEntities(bhop_Level *lvl)
             continue;
         }
 
+#define _impl_bhop_EntityEvent_callIfExists$(handler) { \
+        if ( handler != (void*) 0 ) { handler ( ent ); } \
+        else                        { TraceLog(LOG_INFO, "Empty handler: " #handler "\n" ); }\
+    }; break
+
         if (_impl_bhop_Entity_intersects(player, ent)) {
+            switch (ent->type) {
+            case bhop_Entity_EGG:
+                _impl_bhop_EntityEvent_callIfExists$(onPlayerCollectCoins);
+            case bhop_Entity_MUSTACHO:
+                _impl_bhop_EntityEvent_callIfExists$(onPlayerHitEnemy);
+            default:
+                TraceLog(LOG_FATAL, "Collided with PLAYER or NOTHING!!!");
+            }
+
             ent->type = bhop_Entity_NULL;
         }
     }

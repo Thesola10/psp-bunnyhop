@@ -15,6 +15,8 @@
 #include <pspdisplay.h>
 #include <pspdebug.h>
 #include <pspctrl.h>
+#include <pspaudio.h>
+#include <pspaudiolib.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -25,6 +27,7 @@
 #include "controller.h"
 #include "level.h"
 #include "entity.h"
+#include "sound.h"
 
 PSP_MODULE_INFO("bunnymark", 0, 1, 1);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
@@ -96,6 +99,9 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, "raylib [textures] example - bunnymark");
 
+
+    bhop_initSound();
+
     x=screenWidth/2;
     y=screenHeight/2;
 
@@ -111,6 +117,28 @@ int main(void)
     level_lapinou.terrainLayer.lifetime = 0;
     level_lapinou.decorLayer.lifetime = 0;
 
+    bhop_Sound *bounceSound = bhop_Sound_loadFromFile("host0:/sounds/bounce.wav");
+    bhop_Sound *jumpSound = bhop_Sound_loadFromFile("host0:/sounds/jump.wav");
+    bhop_Sound *collectSound = bhop_Sound_loadFromFile("host0:/sounds/collect.wav");
+    bhop_Sound *hitSound = bhop_Sound_loadFromFile("host0:/sounds/hit.wav");
+
+    bhop_Player_loadOnBounce(bhop_$EntityEvent({
+        bhop_Sound_play(bounceSound);
+    }));
+
+    bhop_Player_loadOnJump(bhop_$EntityEvent({
+        bhop_Sound_play(jumpSound);
+    }));
+
+    bhop_Player_loadOnCollectCoins(bhop_$EntityEvent({
+        bhop_Sound_play(collectSound);
+        target->type = bhop_Entity_NULL;
+    }));
+
+    bhop_Player_loadOnHitEnemy(bhop_$EntityEvent({
+        bhop_Sound_play(hitSound);
+        //TODO: lose points
+    }));
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -137,6 +165,8 @@ int main(void)
         bhop_scanButtons();
 
         bhop_updateEntities(&level_lapinou);
+
+        bhop_refreshSound();
 
         bhop_Entity *player = bhop_Level_getPlayerEntity(&level_lapinou);
         // Update player-controlled-box (box02)
