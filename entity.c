@@ -15,6 +15,7 @@ bhop_Entity *player;
 int playerJumpCd = 0;
 
 bhop_EntityEvent onPlayerJump = 0;
+bhop_EntityEvent onPlayerWallJump = 0;
 bhop_EntityEvent onPlayerBounce = 0;
 
 bhop_EntityEvent onPlayerCollectCoins = 0;
@@ -117,6 +118,10 @@ void bhop_Player_loadOnJump(bhop_EntityEvent evt) {
     onPlayerJump = evt;
 }
 
+void bhop_Player_loadOnWallJump(bhop_EntityEvent evt) {
+    onPlayerWallJump = evt;
+}
+
 void bhop_Player_loadOnHitEnemy(bhop_EntityEvent evt) {
     onPlayerHitEnemy = evt;
 }
@@ -148,6 +153,11 @@ void bhop_updateEntities(bhop_Level *lvl)
                 if (playerJumpCd)
                     onPlayerJump(ent);
 
+            if (player->collider & (bhop_EntityCollider_$WEST | bhop_EntityCollider_$EAST))
+                if (playerJumpCd)
+                    onPlayerWallJump(ent);
+
+
             continue;
         }
 
@@ -165,8 +175,6 @@ void bhop_updateEntities(bhop_Level *lvl)
             default:
                 TraceLog(LOG_FATAL, "Collided with PLAYER or NOTHING!!!");
             }
-
-            ent->type = bhop_Entity_NULL;
         }
     }
 

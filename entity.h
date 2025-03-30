@@ -70,6 +70,7 @@ void bhop_updateEntities(bhop_Level *lvl);
 
 void bhop_Player_loadOnJump(bhop_EntityEvent e);
 void bhop_Player_loadOnBounce(bhop_EntityEvent e);
+void bhop_Player_loadOnWallJump(bhop_EntityEvent e);
 
 void bhop_Player_loadOnCollectCoins(bhop_EntityEvent e);
 void bhop_Player_loadOnHitEnemy(bhop_EntityEvent e);

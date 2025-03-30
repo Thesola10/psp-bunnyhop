@@ -113,6 +113,11 @@ int main(void)
         bhop_Sound_play(jumpSound);
     }));
 
+    bhop_Player_loadOnWallJump(bhop_$EntityEvent({
+        target->velocity.y = -6.0f;
+        bhop_Sound_play(jumpSound);
+    }));
+
     bhop_Player_loadOnCollectCoins(bhop_$EntityEvent({
         bhop_Sound_play(collectSound);
         target->type = bhop_Entity_NULL;
